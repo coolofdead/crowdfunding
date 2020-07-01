@@ -5,9 +5,16 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\PayementRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ApiResource()
+ * @ApiResource(
+ *      normalizationContext={"groups"={"payement"}},
+ *      attributes={
+ *         "formats"={"jsonld", "json", "html", "csv"={"text/csv"}}
+ *     }
+ * )
+ * 
  * @ORM\Entity(repositoryClass=PayementRepository::class)
  */
 class Payement
@@ -21,21 +28,29 @@ class Payement
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("project_payement")
+     * @Groups("payement")
      */
     private $donator_name;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups("project_payement")
+     * @Groups("payement")
      */
     private $amount;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups("project_payement")
+     * @Groups("payement")
      */
     private $comment;
 
     /**
      * @ORM\Column(type="date")
+     * @Groups("project_payement")
+     * @Groups("payement")
      */
     private $payement_date;
 
@@ -46,6 +61,7 @@ class Payement
 
     /**
      * @ORM\ManyToOne(targetEntity=Project::class, inversedBy="payements")
+     * @Groups("payement")
      */
     private $project;
 

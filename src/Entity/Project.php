@@ -7,9 +7,21 @@ use App\Repository\ProjectRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ApiResource()
+ * @ApiResource(
+ *     collectionOperations={
+ *          "get"={"normalization_context"={"groups"="project_payement"}},
+ *     },
+ *     attributes={
+ *         "formats"={"jsonld", "json", "html", "csv"={"text/csv"}}
+ *     }
+ * )
+ * 
+ * @ApiFilter(SearchFilter::class, properties={"name": "ipartial"})
  * @ORM\Entity(repositoryClass=ProjectRepository::class)
  */
 class Project
@@ -23,31 +35,40 @@ class Project
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("project_payement")
+     * @Groups("payement")
      */
     private $name;
 
     /**
      * @ORM\Column(type="date", nullable=true)
+     * @Groups("project_payement")
+     * @Groups("payement")
      */
     private $startDate;
 
     /**
      * @ORM\Column(type="date", nullable=true)
+     * @Groups("project_payement")
+     * @Groups("payement")
      */
     private $endDate;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups("project_payement")
      */
     private $picture;
 
     /**
      * @ORM\Column(type="text", nullable=true)
+     * @Groups("project_payement")
      */
     private $description;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups("project_payement")
      */
     private $goal;
 
@@ -58,6 +79,7 @@ class Project
 
     /**
      * @ORM\OneToMany(targetEntity=Payement::class, mappedBy="project")
+     * @Groups("project_payement")
      */
     private $payements;
 
@@ -184,5 +206,27 @@ class Project
         }
 
         return $this;
+    }
+
+    /**
+     * @Groups("project_payement")
+     */
+    public function getCountPayements(): int
+    {
+        return count($this->payements);
+    }
+    
+    /**
+     * @Groups("project_payement")
+     */
+    public function getCurrentTotalAmount(): int
+    {
+        $total = 0;
+
+        foreach ($this->payements as $payement) {
+            $total += $payement->getAmount();
+        }
+
+        return $total;
     }
 }
